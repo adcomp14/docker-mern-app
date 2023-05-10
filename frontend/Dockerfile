@@ -1,0 +1,41 @@
+#FROM node
+
+#WORKDIR /app
+
+#COPY package.json .
+
+#RUN npm install
+
+#COPY . .
+
+#EXPOSE 3000
+
+#CMD [ "npm", "start" ]
+
+FROM node:14-alpine as build
+
+WORKDIR /app
+
+COPY package.json .
+
+RUN npm install
+
+COPY . .
+
+RUN npm run build
+
+FROM nginx:stable-alpine
+
+COPY --from=build /app/build /usr/share/nginx/html
+
+WORKDIR /etc/nginx/conf.d
+
+COPY nginx.conf default.conf
+
+EXPOSE 80
+
+CMD ["nginx", "-g", "daemon off;"]
+
+
+
+

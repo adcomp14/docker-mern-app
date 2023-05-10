@@ -1,0 +1,85 @@
+version: "3.8"
+services:
+  mongodb:
+    image: 'mongo:4.2'
+    volumes: 
+      - data:/data/db
+    # environment: 
+    #   MONGO_INITDB_ROOT_USERNAME: max
+    #   MONGO_INITDB_ROOT_PASSWORD: secret
+      # - MONGO_INITDB_ROOT_USERNAME=max
+    env_file: 
+      - ./env/mongo.env
+    deploy:
+      resources:
+        limits:
+          cpus: '0.250'
+          memory: 250M
+        #reservations:
+        #  cpus: '0.250'
+        #  memory: 200M
+    logging:
+      driver: "json-file"
+      options:
+        max-file: "5"
+        max-size: "10m"
+  backend:
+    #build: ./backend
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    #   args:
+    #     some-arg: 1
+    # ports:
+    #   - '3000:80'
+    volumes: 
+     # - logs:/app/logs
+      - ./backend:/app
+      - /app/node_modules
+    env_file: 
+      - ./env/backend.env
+    depends_on:
+      - mongodb
+    deploy:
+      resources:
+        limits:
+          cpus: '0.250'
+          memory: 250M
+        #reservations:
+        #  cpus: '0.250'
+        #  memory: 200M
+    logging:
+      driver: "json-file"
+      options:
+        max-file: "5"
+        max-size: "10m"
+  frontend:
+    #build: ./frontend
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports: 
+      - '80:80'
+    # volumes: 
+    #   - ./frontend/src:/app/src
+    # stdin_open: true
+    # tty: true
+    depends_on: 
+      - backend
+    deploy:
+      resources:
+        limits:
+          cpus: '0.250'
+          memory: 250M
+        #reservations:
+        #  cpus: '0.250'
+        #  memory: 200M
+    logging:
+      driver: "json-file"
+      options:
+        max-file: "5"
+        max-size: "10m"
+
+volumes: 
+  data:
+ # logs:
